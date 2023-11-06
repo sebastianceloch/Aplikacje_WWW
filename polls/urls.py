@@ -1,10 +1,10 @@
 from django.urls import path
-from . import views
+from .views import *
 
 urlpatterns = [
-    path('api/persons/', views.person_list, name='person_list'),
-    path('api/persons/<int:pk>/', views.person_detail, name='person_detail'),
-    path('api/person_name/', views.person_name, name='person_name'),
-    path('api/jobs/', views.job_list, name='job-list'),
-    path('api/jobs/<int:pk>/', views.job_detail, name='job-detail'),
+    path('persons/', PersonList.as_view(), name='person-list'),
+    path('persons/<int:pk>/', PersonDetail.as_view(), name='person-detail'),
+    path('persons/search/', PersonName.as_view(), name='person-name'),
+    path('jobs/', JobList.as_view(), name='job-list'),
+    path('jobs/<int:pk>/', JobDetail.as_view(), name='job-detail'),
 ]

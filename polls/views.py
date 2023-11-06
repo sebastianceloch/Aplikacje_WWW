@@ -1,87 +1,116 @@
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from .models import Person, Job
-from .serializers import PersonModelSerializer
-from .serializers import JobSerializer
+from .serializers import PersonModelSerializer, JobSerializer
 
-@api_view(['GET', 'POST'])
-def person_list(request):
-    if request.method == 'GET':
+class PersonList(APIView):
+    """
+    List all persons, or create a new person.
+    """
+    def get(self, request, format=None):
         persons = Person.objects.all()
         serializer = PersonModelSerializer(persons, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
-        serializer = PersonSerializer(data=request.data)
+    def post(self, request, format=None):
+        serializer = PersonModelSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def person_detail(request, pk):
-    try:
-        person = Person.objects.get(pk=pk)
-    except Person.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+class PersonDetail(APIView):
+    """
+    Retrieve, update, or delete a person instance.
+    """
+    def get(self, request, pk, format=None):
+        try:
+            person = Person.objects.get(pk=pk)
+        except Person.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        person = Person.objects.get(pk=pk)
         serializer = PersonModelSerializer(person)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    def put(self, request, pk, format=None):
+        try:
+            person = Person.objects.get(pk=pk)
+        except Person.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         serializer = PersonModelSerializer(person, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
+    def delete(self, request, pk, format=None):
+        try:
+            person = Person.objects.get(pk=pk)
+        except Person.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         person.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-@api_view(['GET'])
-def person_name(request):
-    if request.method == 'GET':
+
+class PersonName(APIView):
+    """
+    List persons by name.
+    """
+    def get(self, request, format=None):
         search_query = request.query_params.get('search', '')
         persons = Person.objects.filter(name__icontains=search_query)
         serializer = PersonModelSerializer(persons, many=True)
         return Response(serializer.data)
 
-@api_view(['GET', 'POST'])
-def job_list(request):
-    if request.method == 'GET':
+class JobList(APIView):
+    """
+    List all jobs, or create a new job.
+    """
+    def get(self, request, format=None):
         jobs = Job.objects.all()
         serializer = JobSerializer(jobs, many=True)
         return Response(serializer.data)
 
-    elif request.method == 'POST':
+    def post(self, request, format=None):
         serializer = JobSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PUT', 'DELETE'])
-def job_detail(request, pk):
-    try:
-        job = Job.objects.get(pk=pk)
-    except Job.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+class JobDetail(APIView):
+    """
+    Retrieve, update, or delete a job instance.
+    """
+    def get(self, request, pk, format=None):
+        try:
+            job = Job.objects.get(pk=pk)
+        except Job.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
         serializer = JobSerializer(job)
         return Response(serializer.data)
 
-    elif request.method == 'PUT':
+    def put(self, request, pk, format=None):
+        try:
+            job = Job.objects.get(pk=pk)
+        except Job.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         serializer = JobSerializer(job, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
+    def delete(self, request, pk, format=None):
+        try:
+            job = Job.objects.get(pk=pk)
+        except Job.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
         job.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
