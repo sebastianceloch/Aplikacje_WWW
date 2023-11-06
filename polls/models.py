@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 class Job(models.Model):
     name = models.CharField(max_length=60, blank=False)
     description = models.TextField(null=True, blank=True)
@@ -16,7 +16,7 @@ class Person(models.Model):
     # wskazanie listy poprzez przypisanie do parametru choices
     sex_type = models.IntegerField(choices=Sex.choices)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    date_added = models.DateField(auto_now_add=True)
+    date_added = models.DateField(default=timezone.now, blank=True)
 
     def __str__(self):
         return f'{self.name} {self.surrname}'

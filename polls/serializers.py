@@ -22,3 +22,11 @@ class PersonModelSerializer(serializers.ModelSerializer):
         fields = ['id','name','surrname','sex_type','job','date_added']
         read_only_fields=['id']
 
+    def validate_date(self, value):
+        if value > date.today():
+            raise serializers.ValidationError("Data nie może być z przyszłości.")
+        return value
+    def validate_name(self, value):
+        if not value.isalpha():
+            raise serializers.ValidationError("Imię może składać się tylko z liter.")
+        return value
