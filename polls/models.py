@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 class Job(models.Model):
     name = models.CharField(max_length=60, blank=False)
     description = models.TextField(null=True, blank=True)
@@ -7,6 +8,7 @@ class Job(models.Model):
         return f'{self.name}'
 class Person(models.Model):
     # lista wartości do wyboru w formie krotek
+
     class Sex(models.IntegerChoices):
         MALE = 1
         FEMALE = 2
@@ -18,6 +20,11 @@ class Person(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
     date_added = models.DateField(default=timezone.now, blank=True)
 
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.DO_NOTHING,
+        default=1
+    )
     def __str__(self):
         return f'{self.name} {self.surrname}'
 
