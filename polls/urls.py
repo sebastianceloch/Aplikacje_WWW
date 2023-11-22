@@ -9,5 +9,6 @@ urlpatterns = [
     path('tasks/<int:pk>/delete/', views.task_delete),
     path('tasks/completed/', views.completed_task_list, {'isComplete': True}),
     path('tasks/incomplete/', views.completed_task_list, {'isComplete': False}),
+    path('users/register/', views.user_register, name='user_register'),
 ]
 

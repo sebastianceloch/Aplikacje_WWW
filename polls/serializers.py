@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import ToDoList, Task
-
+from .models import ToDoList, Task, Category, UserProfile
+from django.contrib.auth.models import User
 
 class TaskSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
@@ -22,5 +22,28 @@ class TaskSerializer(serializers.Serializer):
 
 class ToDoListSerializer(serializers.ModelSerializer):
     model = ToDoList
+    fields = ['id','name','user','category']
+    read_only_fields = ['id']
+
+class CategorySerializer(serializers.ModelSerializer):
+    model = Category
     fields = ['id','name']
     read_only_fields = ['id']
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def create(self, validated_data):
+        user = User(username=validated_data['username'])
+        user.set_password(validated_data['password'])
+        print(validated_data)
+        user.save()
+        return user
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserProfile
+        fields = ['home_address','phone_number']
