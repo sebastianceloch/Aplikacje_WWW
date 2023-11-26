@@ -3,12 +3,19 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, BasePermission
 from .models import Person, Job
 from .serializers import PersonModelSerializer
 from .serializers import JobSerializer
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth.decorators import permission_required
 
+
+class CanViewOtherPersons(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.has_perm('polls.can_view_other_persons')
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated, CanViewOtherPersons])
 def person_list(request):
     if request.method == 'GET':
         persons = Person.objects.filter(owner=request.user)
@@ -23,7 +30,10 @@ def person_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
+@permission_classes([CanViewOtherPersons])
 def person_detail(request, pk):
+    if not request.user.has_perm('polls.person_detail'):
+        raise PermissionDenied()
     try:
         person = Person.objects.get(pk=pk)
     except Person.DoesNotExist:
@@ -78,6 +88,7 @@ def job_list(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET', 'PUT', 'DELETE'])
+@permission_required('polls.job_detail')
 def job_detail(request, pk):
     try:
         job = Job.objects.get(pk=pk)

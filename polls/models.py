@@ -30,3 +30,6 @@ class Person(models.Model):
 
     class Meta:
         ordering = ["surrname"]
+        permissions = [
+            ("can_view_other_person", "Can view other persons"),
+        ]
