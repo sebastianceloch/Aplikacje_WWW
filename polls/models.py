@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.contrib.auth.models import AbstractUser
-
 class User(AbstractUser):
     home_address = models.CharField(max_length=256, blank=False)
     phone_number = models.CharField(max_length=9, blank=False)
@@ -29,7 +28,7 @@ class ToDoList(models.Model):
 class Task(models.Model):
     title = models.CharField(max_length=60)
     description = models.CharField(max_length=256)
-    complete = models.BooleanField(default=False)
+    complete = models.BooleanField(default=False, blank=True, null=True)
     date_posted = models.DateTimeField(auto_now=True)
     todo_list = models.ForeignKey(ToDoList, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)

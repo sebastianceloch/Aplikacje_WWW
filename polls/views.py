@@ -7,20 +7,23 @@ from .serializers import TaskSerializer, ToDoListSerializer, UserSerializer, Cat
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-
+from rest_framework.exceptions import PermissionDenied
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def task_list(request):
     if request.method == 'GET':
         task = Task.objects.filter(user_id=request.user)
-        #task = Task.objects.all()
         serializer = TaskSerializer(task, many=True)
         return Response(serializer.data)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def task_get(request, pk):
     try:
-        task = Task.objects.filter(user_id=request.user).get(pk=pk)
+        task = Task.objects.get(pk=pk)
+        if task.user != request.user:
+            raise PermissionDenied
         serializer = TaskSerializer(task)
         return Response(serializer.data)
     except Task.DoesNotExist:
@@ -28,7 +31,9 @@ def task_get(request, pk):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def task_create(request):
-    serializer = TaskSerializer(data=request.data)
+    data = request.data
+    data['user'] = request.user.id
+    serializer = TaskSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -88,13 +93,17 @@ def todolist_list(request):
 @permission_classes([IsAuthenticated])
 def todolist_get(request, pk):
     if request.method == 'GET':
-        todolist = ToDoList.objects.filter(user_id=request.user).get(pk=pk)
+        todolist = ToDoList.objects.get(pk=pk)
+        if todolist.user != request.user:
+            raise PermissionDenied
         serializer = ToDoListSerializer(todolist, many=False)
         return Response(serializer.data)
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def todolist_create(request):
-    serializer = ToDoListSerializer(data=request.data)
+    data = request.data
+    data['user'] = request.user.id
+    serializer = ToDoListSerializer(data=data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -103,7 +112,7 @@ def todolist_create(request):
 @api_view(['PUT'])
 @permission_classes([IsAuthenticated])
 def todolist_update(request, pk):
-    todolist = get_object_or_404(ToDoListSerializer, pk=pk)
+    todolist = get_object_or_404(ToDoList, pk=pk)
     serializer = ToDoListSerializer(todolist, data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -132,7 +141,7 @@ def category_get(request, pk):
         serializer = CategorySerializer(category, many=False)
         return Response(serializer.data)
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def category_create(request):
     serializer = CategorySerializer(data=request.data)
     if serializer.is_valid():
@@ -141,7 +150,7 @@ def category_create(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['PUT'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def category_update(request, pk):
     category = get_object_or_404(Category, pk=pk)
     serializer = CategorySerializer(category, data=request.data)
@@ -151,7 +160,7 @@ def category_update(request, pk):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([IsAdminUser])
 def category_delete(request, pk):
     category = get_object_or_404(Category, pk=pk)
     category.delete()
