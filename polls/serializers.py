@@ -1,9 +1,5 @@
 from rest_framework import serializers
-from .models import ToDoList, Task, Category
-from django.contrib.auth.models import User
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from .models import ToDoList, Task, Category, User
 class TaskSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField(required=True)
