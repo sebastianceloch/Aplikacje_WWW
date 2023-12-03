@@ -27,7 +27,7 @@ class ToDoList(models.Model):
         ordering = ['name']
 class Task(models.Model):
     title = models.CharField(max_length=60)
-    description = models.CharField(max_length=256)
+    description = models.CharField(max_length=256, blank=True, null=True)
     complete = models.BooleanField(default=False, blank=True, null=True)
     date_posted = models.DateTimeField(auto_now=True)
     todo_list = models.ForeignKey(ToDoList, on_delete=models.CASCADE)
